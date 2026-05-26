@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: #0B0E14;
+  color: #E2E6EF;
+  font-family: 'Instrument Sans', 'DM Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #313848;
+  border-radius: 3px;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(420px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fadeUp { animation: fadeUp 0.4s ease; }
+.animate-pulse-dot { animation: pulse 1.5s infinite; }
+.animate-slideInRight { animation: slideInRight 0.3s ease; }
+.animate-fadeOverlay { animation: fadeOverlay 0.2s ease; }
+
+.shimmer-line {
+  background: linear-gradient(90deg, #252B3A 25%, #313848 50%, #252B3A 75%);
+  background-size: 800px;
+  animation: shimmer 1.5s infinite linear;
+}
