@@ -2,7 +2,16 @@ import { NextResponse } from "next/server";
 
 export async function POST(request) {
   try {
-    const { resumeText } = await request.json();
+    const body = await request.json();
+    const resumeText = body.resumeText;
+
+    if (!resumeText || resumeText.trim().length < 20) {
+      return NextResponse.json({ error: "Please provide resume text (at least 20 characters)." }, { status: 400 });
+    }
+
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return NextResponse.json({ error: "API key not configured. Go to Vercel > Settings > Environment Variables and add ANTHROPIC_API_KEY." }, { status: 500 });
+    }
 
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -60,6 +69,12 @@ ${resumeText}`,
       }),
     });
 
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      const msg = errData?.error?.message || `API returned status ${res.status}`;
+      return NextResponse.json({ error: msg }, { status: res.status });
+    }
+
     const data = await res.json();
 
     if (data.error) {
@@ -72,12 +87,16 @@ ${resumeText}`,
         .map((b) => b.text)
         .join("") || "{}";
 
-    // Clean and parse JSON
     const cleaned = text.replace(/```json|```/g, "").trim();
-    const parsed = JSON.parse(cleaned);
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      return NextResponse.json({ error: "Could not parse resume data from AI response." }, { status: 400 });
+    }
 
+    const parsed = JSON.parse(jsonMatch[0]);
     return NextResponse.json({ parsed });
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error("Resume parse error:", err);
+    return NextResponse.json({ error: err.message || "Unknown error occurred." }, { status: 500 });
   }
 }
