@@ -45,6 +45,10 @@ export async function POST(request) {
   try {
     const { messages } = await request.json();
 
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return NextResponse.json({ error: "API key not configured. Go to Vercel > Settings > Environment Variables and add ANTHROPIC_API_KEY." }, { status: 500 });
+    }
+
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -60,6 +64,12 @@ export async function POST(request) {
       }),
     });
 
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      const msg = errData?.error?.message || `API returned status ${res.status}`;
+      return NextResponse.json({ error: msg }, { status: res.status });
+    }
+
     const data = await res.json();
 
     if (data.error) {
@@ -73,6 +83,7 @@ export async function POST(request) {
 
     return NextResponse.json({ text });
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error("Generate error:", err);
+    return NextResponse.json({ error: err.message || "Unknown error occurred." }, { status: 500 });
   }
 }
